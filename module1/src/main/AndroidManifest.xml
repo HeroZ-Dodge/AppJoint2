@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.dodge.hero.z.module1">
+
+    <application>
+        <activity android:name="com.dodge.hero.module1.ui.MainActivity"></activity>
+    </application>
+
+</manifest>

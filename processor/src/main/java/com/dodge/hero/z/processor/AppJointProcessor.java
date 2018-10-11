@@ -4,7 +4,6 @@ import com.dodge.hero.z.annotation.ModuleSpec;
 import com.dodge.hero.z.annotation.RouterSpec;
 import com.google.auto.service.AutoService;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -56,7 +55,6 @@ public class AppJointProcessor extends AbstractProcessor {
         mTypes = processingEnv.getTypeUtils();
     }
 
-
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
 
@@ -75,8 +73,7 @@ public class AppJointProcessor extends AbstractProcessor {
         }
         moduleSetMethod.addStatement("return moduleSet");
 
-
-        Map<String, String> routerMap = getRouterMap(roundEnvironment);
+        Map<String, String> routerMap = getRouterMap(roundEnvironment); // 所有路由
         TypeName routerMapType = ParameterizedTypeName.get(mapName, clzName, clzName);
         MethodSpec.Builder routerMapMethod = MethodSpec.methodBuilder("getRouterMap")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -89,14 +86,14 @@ public class AppJointProcessor extends AbstractProcessor {
         }
         routerMapMethod.addStatement("return routerMap");
 
-
+        //  生成代码
         TypeSpec typeSpec = TypeSpec.classBuilder("AppJointProvider")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(ClassName.get("com.dodge.hero.z.library", "IAppJointProvider"))
                 .addMethod(moduleSetMethod.build())
                 .addMethod(routerMapMethod.build())
                 .build();
-        JavaFile javaFile = JavaFile.builder("com.dodge.hero.z.processor", typeSpec).build();// 生成源代码
+        JavaFile javaFile = JavaFile.builder("com.dodge.hero.z.processor", typeSpec).build();
 
         try {
             javaFile.writeTo(filerUtils);
@@ -106,6 +103,10 @@ public class AppJointProcessor extends AbstractProcessor {
         return true;
     }
 
+    /**
+     * 获取路由接口和实现类的对应关系
+     * @param roundEnvironment
+     */
     private Map<String, String> getRouterMap(RoundEnvironment roundEnvironment) {
         Map<String, String> routerMap = new HashMap<>();
         Set<? extends Element> routerElements = roundEnvironment.getElementsAnnotatedWith(RouterSpec.class);
@@ -125,6 +126,10 @@ public class AppJointProcessor extends AbstractProcessor {
         return routerMap;
     }
 
+    /**
+     * 获取各模块信息
+     * @param roundEnvironment
+     */
     private Set<String> getModuleSet(RoundEnvironment roundEnvironment) {
         Set<String> moduleSet = new HashSet<>();
         Set<? extends Element> moduleElements = roundEnvironment.getElementsAnnotatedWith(ModuleSpec.class);
