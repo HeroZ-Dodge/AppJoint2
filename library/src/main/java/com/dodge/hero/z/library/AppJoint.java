@@ -1,4 +1,4 @@
-package com.dodge.hero.z.appjoint;
+package com.dodge.hero.z.library;
 
 import android.app.Application;
 import android.content.Context;
@@ -9,22 +9,23 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-
-/**
- * Created by zhounl on 2017/11/15.
- */
+import java.util.Set;
 
 public class AppJoint {
 
     private List<Application> moduleApplications = new ArrayList<>();
 
+    private Set<Class> moduleSet = new HashSet<>();
+
     private Map<Class, Class> routersMap = new HashMap<>();
 
     private Map<Class, Object> routerInstanceMap = new HashMap<>();
 
-    private AppJoint() { }
+    private AppJoint() {
+    }
 
     public void attachBaseContext(Context context) {
         for (Application app : moduleApplications) {
@@ -69,7 +70,27 @@ public class AppJoint {
         }
     }
 
-    public static synchronized <T> T service(Class<T> routerType) {
+    public List<Application> moduleApplications() {
+        return moduleApplications;
+    }
+
+    public Map<Class, Class> routersMap() {
+        return routersMap;
+    }
+
+    public static AppJoint get() {
+        return SingletonHolder.INSTANCE;
+    }
+
+    public static void init(IAppJointProvider provider) {
+        get().routersMap.clear();
+        get().routersMap.putAll(provider.getRouterMap());
+
+        get().moduleSet.clear();
+        get().moduleSet.addAll(provider.getModuleSet());
+    }
+
+    public static synchronized <T> T router(Class<T> routerType) {
         T requiredRouter = null;
         if (!get().routerInstanceMap.containsKey(routerType)) {
             try {
@@ -84,25 +105,9 @@ public class AppJoint {
         return requiredRouter;
     }
 
-    public List<Application> moduleApplications() {
-        return moduleApplications;
-    }
-
-    public Map<Class, Class> routersMap() {
-        return routersMap;
-    }
-
-    public static AppJoint get() {
-        return SingletonHolder.INSTANCE;
-    }
-
     static class SingletonHolder {
         static AppJoint INSTANCE = new AppJoint();
     }
-
-    public void init() {
-    }
-
 
 
 }

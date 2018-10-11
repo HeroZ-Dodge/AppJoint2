@@ -16,7 +16,7 @@ import java.util.Map;
  * Created by zhounl on 2017/11/15.
  */
 
-public class AppJoint {
+public class AppJoint2 {
 
     private List<Application> moduleApplications = new ArrayList<>();
 
@@ -24,7 +24,7 @@ public class AppJoint {
 
     private Map<Class, Object> routerInstanceMap = new HashMap<>();
 
-    private AppJoint() { }
+    private AppJoint2() { }
 
     public void attachBaseContext(Context context) {
         for (Application app : moduleApplications) {
@@ -92,15 +92,12 @@ public class AppJoint {
         return routersMap;
     }
 
-    public static AppJoint get() {
+    public static AppJoint2 get() {
         return SingletonHolder.INSTANCE;
     }
 
     static class SingletonHolder {
-        static AppJoint INSTANCE = new AppJoint();
-    }
-
-    public void init() {
+        static AppJoint2 INSTANCE = new AppJoint2();
     }
 
 

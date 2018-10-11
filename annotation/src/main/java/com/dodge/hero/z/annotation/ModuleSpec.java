@@ -4,7 +4,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * Created by zhounl on 2017/11/14.
+ * 模块注解
  */
 @Retention(RetentionPolicy.CLASS)
 public @interface ModuleSpec {
