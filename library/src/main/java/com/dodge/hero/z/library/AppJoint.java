@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.res.Configuration;
+import android.util.Log;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -15,6 +16,8 @@ import java.util.Map;
 import java.util.Set;
 
 public class AppJoint {
+
+    public static final String TAG = "AppJoint";
 
     private List<Application> moduleApplications = new ArrayList<>();
 
@@ -82,12 +85,18 @@ public class AppJoint {
         return SingletonHolder.INSTANCE;
     }
 
-    public static void init(IAppJointProvider provider) {
-        get().routersMap.clear();
-        get().routersMap.putAll(provider.getRouterMap());
+    public static void init() {
+        Log.d(TAG, "init: start to register Router and Module");
+        // Auto register by plugin
+        // look like this
+//        register(new AppJointProvider$app());
+//        register(new AppJointProvider$module1());
+    }
 
-        get().moduleSet.clear();
-        get().moduleSet.addAll(provider.getModuleSet());
+
+    public static void register(IAppJointProvider scanInterface) {
+        get().routersMap.putAll(scanInterface.getRouterMap());
+        get().moduleSet.addAll(scanInterface.getModuleSet());
     }
 
     public static synchronized <T> T router(Class<T> routerType) {

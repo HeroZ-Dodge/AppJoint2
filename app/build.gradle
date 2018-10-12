@@ -4,6 +4,8 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
+apply plugin: 'auto-register'
+
 android {
     compileSdkVersion 27
     defaultConfig {
@@ -28,6 +30,22 @@ android {
         }
     }
 }
+
+autoregister {
+    // https://github.com/luckybilly/AutoRegister
+    registerInfo = [
+            [
+                    'scanInterface'        : 'com.dodge.hero.z.library.IAppJointProvider',
+                    'codeInsertToClassName': 'com.dodge.hero.z.library.AppJoint',
+                    'codeInsertToMethodName'  : 'init',
+                    'registerMethodName'   : 'register',
+                    //排除的类，支持正则表达式（包分隔符需要用/表示，不能用.）
+                    //排除这个基类
+//                    'exclude'              : ['com.billy.android.autoregister.demo.BaseCategory'.replaceAll('\\.', '/')]
+            ]
+    ]
+}
+
 
 dependencies {
     implementation fileTree(include: ['*.jar'], dir: 'libs')
