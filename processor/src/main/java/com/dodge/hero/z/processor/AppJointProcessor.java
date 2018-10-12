@@ -40,11 +40,16 @@ import javax.lang.model.util.Types;
 @SupportedAnnotationTypes({"com.dodge.hero.z.annotation.RouterSpec", "com.dodge.hero.z.annotation.ModuleSpec"})
 public class AppJointProcessor extends AbstractProcessor {
 
+    public static final String FACADE_PACKAGE = "com.dodge.hero.z.processor";
+    public static final String JAVA_NAME = "AppJointProvider$";
+    public static final String OPTIONS_MODULE_NAME = "APP_JOINT_MODULE_NAME";
 
     private Filer filerUtils; // 文件写入
     private Elements elementUtils; // 操作Element 的工具类
     private Messager messagerUtils; // Log 日志
     private Types mTypes;
+
+    private String moduleName;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
@@ -53,6 +58,8 @@ public class AppJointProcessor extends AbstractProcessor {
         elementUtils = processingEnv.getElementUtils();
         messagerUtils = processingEnv.getMessager();
         mTypes = processingEnv.getTypeUtils();
+        Map<String, String>  options = processingEnv.getOptions();
+        moduleName = options.get(OPTIONS_MODULE_NAME);
     }
 
     @Override
@@ -87,13 +94,13 @@ public class AppJointProcessor extends AbstractProcessor {
         routerMapMethod.addStatement("return routerMap");
 
         //  生成代码
-        TypeSpec typeSpec = TypeSpec.classBuilder("AppJointProvider")
+        TypeSpec typeSpec = TypeSpec.classBuilder(JAVA_NAME + moduleName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
                 .addSuperinterface(ClassName.get("com.dodge.hero.z.library", "IAppJointProvider"))
                 .addMethod(moduleSetMethod.build())
                 .addMethod(routerMapMethod.build())
                 .build();
-        JavaFile javaFile = JavaFile.builder("com.dodge.hero.z.processor", typeSpec).build();
+        JavaFile javaFile = JavaFile.builder(FACADE_PACKAGE, typeSpec).build();
 
         try {
             javaFile.writeTo(filerUtils);
