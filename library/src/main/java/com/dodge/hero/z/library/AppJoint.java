@@ -85,8 +85,8 @@ public class AppJoint {
         return SingletonHolder.INSTANCE;
     }
 
-    public static void init() {
-        Log.d(TAG, "init: start to register Router and Module");
+    public static void initDodgeJoin() {
+        Log.d(TAG, "initDodgeJoin: start to register Router and Module");
         // Auto register by plugin
         // look like this
 //        register(new AppJointProvider$app());

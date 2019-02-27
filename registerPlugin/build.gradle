@@ -1,0 +1,31 @@
+plugins {
+    id 'groovy'
+    id 'kotlin'
+    id 'maven'
+}
+
+
+dependencies {
+    implementation gradleApi()
+    implementation localGroovy()
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "com.android.tools.build:gradle:3.2.0"
+}
+
+repositories {
+    mavenCentral()
+}
+
+//设置maven deployer
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            //设置插件的GAV参数
+            pom.groupId = 'com.dodge.register'
+            pom.artifactId = 'register-plugin'
+            pom.version = 1.0
+            //文件发布到下面目录
+            repository(url: uri('../release'))
+        }
+    }
+}

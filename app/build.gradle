@@ -4,7 +4,11 @@ apply plugin: 'kotlin-android'
 
 apply plugin: 'kotlin-android-extensions'
 
-apply plugin: 'auto-register'
+//apply plugin: 'code-register'
+//apply plugin: 'auto-register'
+
+apply plugin: 'my-register'
+//apply plugin: 'register-test'
 
 android {
     compileSdkVersion 27
@@ -31,20 +35,20 @@ android {
     }
 }
 
-autoregister {
-    // https://github.com/luckybilly/AutoRegister
-    registerInfo = [
-            [
-                    'scanInterface'        : 'com.dodge.hero.z.library.IAppJointProvider',
-                    'codeInsertToClassName': 'com.dodge.hero.z.library.AppJoint',
-                    'codeInsertToMethodName'  : 'init',
-                    'registerMethodName'   : 'register',
-                    //排除的类，支持正则表达式（包分隔符需要用/表示，不能用.）
-                    //排除这个基类
-//                    'exclude'              : ['com.billy.android.autoregister.demo.BaseCategory'.replaceAll('\\.', '/')]
-            ]
-    ]
-}
+//autoregister {
+//    // https://github.com/luckybilly/AutoRegister
+//    registerInfo = [
+//            [
+//                    'scanInterface'        : 'com.dodge.hero.z.library.IAppJointProvider',
+//                    'codeInsertToClassName': 'com.dodge.hero.z.library.AppJoint',
+//                    'codeInsertToMethodName'  : 'initDodgeJoin',
+//                    'registerMethodName'   : 'register',
+//                    //排除的类，支持正则表达式（包分隔符需要用/表示，不能用.）
+//                    //排除这个基类
+////                    'exclude'              : ['com.billy.android.autoregister.demo.BaseCategory'.replaceAll('\\.', '/')]
+//            ]
+//    ]
+//}
 
 
 dependencies {

@@ -14,7 +14,7 @@ public class MyApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        AppJoint.init();
+        AppJoint.initDodgeJoin();
         AppJoint.get().onCreate();
     }
 
