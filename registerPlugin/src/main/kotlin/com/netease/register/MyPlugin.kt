@@ -1,6 +1,7 @@
 package com.netease.register
 
 import com.android.build.gradle.AppExtension
+import com.android.build.gradle.AppPlugin
 import org.gradle.api.Plugin
 import org.gradle.api.Project
 
@@ -12,16 +13,12 @@ class MyPlugin : Plugin<Project> {
 
     override fun apply(project: Project) {
 
-//        project.plugins.hasPlugin(AppPlugin::class) {
-//
-//        }
+        if (project.plugins.hasPlugin(AppPlugin::class.java)) {
+            val android = project.extensions.getByType(AppExtension::class.java)
+            val transform = RegisterTransform(project)
+            android.registerTransform(transform)
+        }
 
-
-        val android = project.extensions.getByType(AppExtension::class.java)
-
-        val transform = RegisterTransform()
-
-        android.registerTransform(transform)
 
     }
 }

@@ -1,28 +1,17 @@
 package com.netease.register
 
-import com.android.build.api.transform.Format
-import com.android.build.api.transform.QualifiedContent
-import com.android.build.api.transform.Transform
-import com.android.build.api.transform.TransformInvocation
+import com.android.build.api.transform.*
 import com.android.build.gradle.internal.pipeline.TransformManager
 import com.android.utils.FileUtils
 import org.apache.commons.codec.digest.DigestUtils
-import org.apache.commons.io.IOUtils
-import org.objectweb.asm.ClassReader
-import org.objectweb.asm.ClassWriter
-import org.objectweb.asm.Opcodes
+import org.gradle.api.Project
 import java.io.File
-import java.io.FileInputStream
-import java.io.FileOutputStream
-import java.util.jar.JarFile
-import java.util.jar.JarOutputStream
-import java.util.zip.ZipEntry
 
 
 /**
  *  Created by linzheng on 2019/2/25.
  */
-class RegisterTransform : Transform() {
+class RegisterTransform(val project: Project) : Transform() {
 
 
     override fun getName(): String {
@@ -42,102 +31,51 @@ class RegisterTransform : Transform() {
     }
 
     override fun transform(transformInvocation: TransformInvocation?) {
-        super.transform(transformInvocation)
-        println("dodge_start transform")
+
+        project.logger.warn("Dodge_start transform")
+        val codeScanProcessor = CodeScanProcessor(arrayListOf())
         transformInvocation?.inputs?.forEach { transformInput ->
+
+            // 遍历class
             transformInput.directoryInputs.forEach { input ->
                 val dest = transformInvocation.outputProvider.getContentLocation(input.name, input.contentTypes, input.scopes, Format.DIRECTORY)
-                //遍历目录下的每个文件
-                scanFileDirectory(input.file)
-                // 处理完后拷到目标文件
+                if (input.file.isDirectory) {
+                    codeScanProcessor.scanFromDirectory(input.file, dest)
+                }
                 FileUtils.copyDirectory(input.file, dest)
             }
-            transformInput.jarInputs.forEach { jarInput ->
 
-                if (jarInput.file.absolutePath.endsWith(".jar")) {
-                    // ...对jar进行插入字节码
-                    val tempFile = File(jarInput.file.parent + File.separator + "dodge_temp.jar")
-
-                    if (tempFile.exists()) {
-                        tempFile.delete()
-                    }
-                    val fos = FileOutputStream(tempFile)
-                    val jarOutputStream = JarOutputStream(fos)
-
-                    val jarFile = JarFile(jarInput.file)
-                    val enumeration = jarFile.entries()
-                    while (enumeration.hasMoreElements()) {
-                        val jarEntry = enumeration.nextElement()
-                        val entryName = jarEntry.name
-                        val zipEntry = ZipEntry(entryName)
-//                        println "==== jarInput class entryName :" + entryName
-                        if (entryName.endsWith(".class")) {
-                            jarOutputStream.putNextEntry(zipEntry)
-                            val inputStream = jarFile.getInputStream(jarEntry)
-                            val classReader = ClassReader(IOUtils.toByteArray(inputStream))
-                            val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
-                            val cv = MyClassVisitor(Opcodes.ASM5, classWriter)
-                            classReader.accept(cv, ClassReader.EXPAND_FRAMES)
-
-                            val bytes = classWriter.toByteArray()
-                            jarOutputStream.write(bytes)
-                            inputStream.close()
-                        }
-                    }
-
-                    //结束
-                    jarOutputStream.closeEntry()
-                    jarOutputStream.close()
-                    fos.close()
-                    jarFile.close()
+            // 遍历jar
+            transformInput.jarInputs.forEach { input ->
+                val dest = getDestFile(input, transformInvocation.outputProvider)
+                if (input.file.absolutePath.endsWith(".jar")) {
+                    codeScanProcessor.scanFromJar(input, dest)
+                    project.logger.warn("Dodge- jar name = ${input.name}")
                 }
-                var jarName = jarInput.name
-                val md5Name = DigestUtils.md5Hex(jarInput.file.absolutePath)
-                if (jarName.endsWith(".jar")) {
-                    jarName = jarName.substring(0, jarName.length - 4)
-                }
-                val dest = transformInvocation.outputProvider.getContentLocation(jarName + md5Name, jarInput.contentTypes, jarInput.scopes, Format.JAR)
-                FileUtils.copyFile(jarInput.file, dest)
+                FileUtils.copyFile(input.file, dest)
             }
         }
 
-        println("dodge_end transform")
-    }
-
-
-    private fun scanJar() {
-
-
-    }
-
-
-    private fun scanFileDirectory(file: File) {
-        file.listFiles()?.forEach {
-            if (it.isFile) {
-                val path = it.name
-                if (path.endsWith(".class") && !name.startsWith("R\$") && "R.class" != path && "BuildConfig.class" != path) {
-                    insertCode(it)
-                }
-            } else {
-                scanFileDirectory(it)
+        project.logger.warn("dodge_end transform")
+        project.logger.warn("interface size = ${codeScanProcessor.classList.size}")
+        project.logger.warn(codeScanProcessor.classList.toString())
+        codeScanProcessor.injectClassFile?.let {
+            CodeInjectProcessor(codeScanProcessor.classList).apply {
+                injectCode(it)
             }
         }
     }
 
 
-    private fun insertCode(file: File) {
-        val inputStream = FileInputStream(file)
-        val classReader = ClassReader(FileInputStream(file))
-        val classWriter = ClassWriter(classReader, ClassWriter.COMPUTE_MAXS)
-        val classVisitor = MyClassVisitor(Opcodes.ASM6, classWriter)
-        classReader.accept(classVisitor, ClassReader.EXPAND_FRAMES)
-        val code = classWriter.toByteArray()
+    fun getDestFile(jarInput: JarInput, outputProvider: TransformOutputProvider): File {
+        var jarName = jarInput.name
+        if (jarName.endsWith(".jar")) {
+            jarName = jarName.substring(0, jarName.length - 4)
+        }
+        jarName += DigestUtils.md5Hex(jarInput.file.absolutePath)
+        return outputProvider.getContentLocation(jarName, jarInput.contentTypes, jarInput.scopes, Format.JAR)
 
-        val outputStream = FileOutputStream(file)
-        outputStream.write(code)
 
-        inputStream.close()
-        outputStream.close()
     }
 
 
