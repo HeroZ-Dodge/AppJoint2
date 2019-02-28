@@ -24,6 +24,9 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedOptions;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -31,12 +34,15 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
 
 /**
  * Created by linzheng on 2018/10/11.
  */
 
 @AutoService(Processor.class)
+@SupportedOptions({"APP_JOINT_MODULE_NAME"})
+@SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({"com.dodge.hero.z.annotation.RouterSpec", "com.dodge.hero.z.annotation.ModuleSpec"})
 public class AppJointProcessor extends AbstractProcessor {
 
@@ -46,30 +52,34 @@ public class AppJointProcessor extends AbstractProcessor {
 
     private Filer filerUtils; // 文件写入
     private Elements elementUtils; // 操作Element 的工具类
-    private Messager messagerUtils; // Log 日志
+    private Messager mMessagerUtils; // Log 日志
     private Types mTypes;
-
-    private String moduleName;
 
     @Override
     public synchronized void init(ProcessingEnvironment processingEnv) {
         super.init(processingEnv);
         filerUtils = processingEnv.getFiler();
         elementUtils = processingEnv.getElementUtils();
-        messagerUtils = processingEnv.getMessager();
+        mMessagerUtils = processingEnv.getMessager();
         mTypes = processingEnv.getTypeUtils();
-        Map<String, String>  options = processingEnv.getOptions();
-        moduleName = options.get(OPTIONS_MODULE_NAME);
     }
 
     @Override
     public boolean process(Set<? extends TypeElement> set, RoundEnvironment roundEnvironment) {
+        mMessagerUtils.printMessage(Diagnostic.Kind.NOTE, roundEnvironment.toString());     //打印传入的roundEvn对象信息
+        mMessagerUtils.printMessage(Diagnostic.Kind.NOTE, set.toString());                  //遍历annotation，打印出注解类型
+
+        if (set.isEmpty() || roundEnvironment.getRootElements().isEmpty()) {
+            mMessagerUtils.printMessage(Diagnostic.Kind.NOTE, "input is empty, return");
+            return true;
+        }
 
         ClassName clzName = ClassName.get(Class.class);
         ClassName mapName = ClassName.get(Map.class);
         ClassName setName = ClassName.get(Set.class);
-
+        // getModuleSet()
         Set<String> moduleSet = getModuleSet(roundEnvironment);// 所有Modules
+        mMessagerUtils.printMessage(Diagnostic.Kind.NOTE, "module = " + moduleSet.toString());
         TypeName moduleSetType = ParameterizedTypeName.get(setName, clzName);
         MethodSpec.Builder moduleSetMethod = MethodSpec.methodBuilder("getModuleSet")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -79,8 +89,9 @@ public class AppJointProcessor extends AbstractProcessor {
             moduleSetMethod.addStatement("moduleSet.add($T.class)", elementUtils.getTypeElement(name));
         }
         moduleSetMethod.addStatement("return moduleSet");
-
+        // getRouterMap()
         Map<String, String> routerMap = getRouterMap(roundEnvironment); // 所有路由
+        mMessagerUtils.printMessage(Diagnostic.Kind.NOTE, "routerMap = " + routerMap.toString());
         TypeName routerMapType = ParameterizedTypeName.get(mapName, clzName, clzName);
         MethodSpec.Builder routerMapMethod = MethodSpec.methodBuilder("getRouterMap")
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -93,6 +104,8 @@ public class AppJointProcessor extends AbstractProcessor {
         }
         routerMapMethod.addStatement("return routerMap");
 
+        Map<String, String> options = processingEnv.getOptions();
+        String moduleName = options.get(OPTIONS_MODULE_NAME);
         //  生成代码
         TypeSpec typeSpec = TypeSpec.classBuilder(JAVA_NAME + moduleName)
                 .addModifiers(Modifier.PUBLIC, Modifier.FINAL)
@@ -112,6 +125,7 @@ public class AppJointProcessor extends AbstractProcessor {
 
     /**
      * 获取路由接口和实现类的对应关系
+     *
      * @param roundEnvironment
      */
     private Map<String, String> getRouterMap(RoundEnvironment roundEnvironment) {
@@ -135,6 +149,7 @@ public class AppJointProcessor extends AbstractProcessor {
 
     /**
      * 获取各模块信息
+     *
      * @param roundEnvironment
      */
     private Set<String> getModuleSet(RoundEnvironment roundEnvironment) {

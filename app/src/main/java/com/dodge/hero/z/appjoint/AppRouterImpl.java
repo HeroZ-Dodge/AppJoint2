@@ -1,6 +1,8 @@
 package com.dodge.hero.z.appjoint;
 
+import android.content.Context;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.dodge.hero.z.annotation.RouterSpec;
 import com.dodge.hero.z.module1.router.IAppRouter;
@@ -17,6 +19,11 @@ public class AppRouterImpl implements IAppRouter {
     @Override
     public void print() {
         Log.d(TAG, "print: here is " + TAG);
+    }
+
+    @Override
+    public void method1(Context context) {
+        Toast.makeText(context, "App method", Toast.LENGTH_SHORT).show();
     }
 
 }

@@ -11,4 +11,9 @@ public interface IModuleRouter {
     void print();
 
     void startActivity(Context context);
+
+    void method1(Context context);
+
+    void method2(Context context);
+
 }

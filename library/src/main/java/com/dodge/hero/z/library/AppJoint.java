@@ -87,7 +87,7 @@ public class AppJoint {
 
     public static void initDodgeJoin() {
         Log.d(TAG, "initDodgeJoin: start to register Router and Module");
-        // Auto register by plugin
+        // register by plugin
         // look like this
 //        register(new AppJointProvider$app());
 //        register(new AppJointProvider$module1());
@@ -99,6 +99,7 @@ public class AppJoint {
         get().moduleSet.addAll(scanInterface.getModuleSet());
     }
 
+    @SuppressWarnings("unchecked")
     public static synchronized <T> T router(Class<T> routerType) {
         T requiredRouter = null;
         if (!get().routerInstanceMap.containsKey(routerType)) {
