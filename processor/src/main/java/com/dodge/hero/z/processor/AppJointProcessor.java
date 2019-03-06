@@ -25,7 +25,6 @@ import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.annotation.processing.SupportedAnnotationTypes;
 import javax.annotation.processing.SupportedOptions;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -42,13 +41,12 @@ import javax.tools.Diagnostic;
 
 @AutoService(Processor.class)
 @SupportedOptions({"APP_JOINT_MODULE_NAME"})
-@SupportedSourceVersion(SourceVersion.RELEASE_7)
 @SupportedAnnotationTypes({"com.dodge.hero.z.annotation.RouterSpec", "com.dodge.hero.z.annotation.ModuleSpec"})
 public class AppJointProcessor extends AbstractProcessor {
 
-    public static final String FACADE_PACKAGE = "com.dodge.hero.z.processor";
-    public static final String JAVA_NAME = "AppJointProvider$";
-    public static final String OPTIONS_MODULE_NAME = "APP_JOINT_MODULE_NAME";
+    private static final String FACADE_PACKAGE = "com.dodge.hero.z.processor";
+    private static final String JAVA_NAME = "AppJointProvider$";
+    private static final String OPTIONS_MODULE_NAME = "APP_JOINT_MODULE_NAME";
 
     private Filer filerUtils; // 文件写入
     private Elements elementUtils; // 操作Element 的工具类
@@ -62,6 +60,11 @@ public class AppJointProcessor extends AbstractProcessor {
         elementUtils = processingEnv.getElementUtils();
         mMessagerUtils = processingEnv.getMessager();
         mTypes = processingEnv.getTypeUtils();
+    }
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
     }
 
     @Override
@@ -126,12 +129,15 @@ public class AppJointProcessor extends AbstractProcessor {
     /**
      * 获取路由接口和实现类的对应关系
      *
-     * @param roundEnvironment
+     * @param roundEnvironment roundEnvironment
      */
     private Map<String, String> getRouterMap(RoundEnvironment roundEnvironment) {
         Map<String, String> routerMap = new HashMap<>();
         Set<? extends Element> routerElements = roundEnvironment.getElementsAnnotatedWith(RouterSpec.class);
         for (Element element : routerElements) {
+            // 读取自定义注解的值
+            String value = element.getAnnotation(RouterSpec.class).value();
+            mMessagerUtils.printMessage(Diagnostic.Kind.NOTE, "path = " + value);
             if (element instanceof TypeElement && element.getKind() == ElementKind.CLASS) {
                 String className = ((TypeElement) element).getQualifiedName().toString();
                 List<? extends TypeMirror> typeMirrors = ((TypeElement) element).getInterfaces();
@@ -150,7 +156,7 @@ public class AppJointProcessor extends AbstractProcessor {
     /**
      * 获取各模块信息
      *
-     * @param roundEnvironment
+     * @param roundEnvironment roundEnvironment
      */
     private Set<String> getModuleSet(RoundEnvironment roundEnvironment) {
         Set<String> moduleSet = new HashSet<>();

@@ -56,7 +56,6 @@ class RegisterTransform(val project: Project) : Transform() {
             }
         }
 
-        project.logger.warn("dodge_end transform")
         project.logger.warn("interface size = ${codeScanProcessor.classList.size}")
         project.logger.warn(codeScanProcessor.classList.toString())
         codeScanProcessor.injectClassFile?.let {
@@ -64,6 +63,7 @@ class RegisterTransform(val project: Project) : Transform() {
                 injectCode(it)
             }
         }
+        project.logger.warn("dodge_end transform")
     }
 
 

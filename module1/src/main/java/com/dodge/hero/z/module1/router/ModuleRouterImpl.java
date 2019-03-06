@@ -11,7 +11,7 @@ import com.dodge.hero.z.annotation.RouterSpec;
 /**
  * Created by linzheng on 2018/10/11.
  */
-@RouterSpec
+@RouterSpec("module1")
 public class ModuleRouterImpl implements IModuleRouter {
 
     public static final String TAG = ModuleRouterImpl.class.getSimpleName();

@@ -16,7 +16,7 @@ import java.util.zip.ZipEntry
  *  Created by linzheng on 2019/2/27.
  */
 
-class CodeInjectProcessor(val classList: List<String>) {
+class CodeInjectProcessor(private val classList: List<String>) {
 
 
     fun injectCode(file: File) {

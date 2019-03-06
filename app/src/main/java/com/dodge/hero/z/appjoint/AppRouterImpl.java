@@ -11,7 +11,7 @@ import com.dodge.hero.z.module1.router.IAppRouter;
  * Created by linzheng on 2018/10/11.
  */
 
-@RouterSpec
+@RouterSpec("app")
 public class AppRouterImpl implements IAppRouter {
 
     public static final String TAG = AppRouterImpl.class.getSimpleName();
