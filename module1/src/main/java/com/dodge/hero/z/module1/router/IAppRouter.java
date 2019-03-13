@@ -12,5 +12,7 @@ public interface IAppRouter {
 
     void method1(Context context);
 
+    void startPage(Context context);
+
 
 }

@@ -4,7 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.dodge.hero.module1.ui.MainActivity">
+    tools:context="com.dodge.hero.module1.ui.MainActivity"
+    tools:ignore="MissingConstraints">
 
     <android.support.v7.widget.Toolbar
         android:id="@+id/toolbar"
@@ -20,7 +21,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="调用主模块方法"
+        android:text="调用主模块页面"
         app:layout_constraintTop_toBottomOf="@+id/toolbar" />
 
 
@@ -29,7 +30,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:text="调用主模块页面"
+        android:text="调用主模块方法"
         app:layout_constraintTop_toBottomOf="@+id/btn_app_module_page" />
 
     <TextView

@@ -1,6 +1,7 @@
 package com.dodge.hero.z.appjoint;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.widget.Toast;
 
@@ -24,6 +25,12 @@ public class AppRouterImpl implements IAppRouter {
     @Override
     public void method1(Context context) {
         Toast.makeText(context, "App method", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void startPage(Context context) {
+        Intent intent = new Intent(context, AppTestActivity.class);
+        context.startActivity(intent);
     }
 
 }
